@@ -11,7 +11,7 @@
 
 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) is Anthropic's official AI coding agent — one of the most capable on the market. By default it requires an Anthropic API subscription that can cost **$100–$200+ per month** for heavy usage.
 
-**This proxy changes that.** It sits between Claude Code and the internet, translating Anthropic API calls into OpenAI-compatible requests and forwarding them to [NVIDIA NIM](https://integrate.api.nvidia.com) — which offers a **free preview tier** with access to large open-weight models (Llama 3.1 405B, Mistral, GLM, and more).
+**This proxy changes that.** It sits between Claude Code and the internet, translating Anthropic API calls into OpenAI-compatible requests and forwarding them to [NVIDIA NIM](https://build.nvidia.com/) — which offers a **free preview tier** with access to large open-weight models (Llama 3.1 405B, Mistral, GLM, and more).
 
 ```
 Claude Code / VS Code Extension
@@ -73,7 +73,7 @@ python-proxy/
 
 - Python 3.11+
 - `pip`
-- An [NVIDIA NIM API key](https://integrate.api.nvidia.com) — free tier available
+- An [NVIDIA NIM API key](https://build.nvidia.com/) — free tier available
 
 > **Free models:** NVIDIA offers a generous set of free preview models (no billing required).
 > Browse the full list at **[build.nvidia.com/models → Free Preview](https://build.nvidia.com/models?filters=nimType%3Anim_type_preview)** and use any model ID (e.g. `z-ai/glm4.7`) as the value for `YOUR_MODEL_HERE` in your settings.
