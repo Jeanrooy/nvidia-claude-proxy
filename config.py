@@ -40,7 +40,7 @@ class ServerConfig:
 
 
 def load_config() -> ServerConfig:
-    addr = _env("ADDR", "127.0.0.1:3001")
+    addr = _env("ADDR", "127.0.0.1:8089")
     if ":" in addr:
         host, port_str = addr.rsplit(":", 1)
         try:
@@ -49,7 +49,7 @@ def load_config() -> ServerConfig:
             raise ValueError(f"Invalid port in ADDR: {addr!r}")
     else:
         host = addr
-        port = 3001
+        port = 8089
 
     upstream_url = _env("UPSTREAM_URL")
     provider_api_key = _env("PROVIDER_API_KEY")

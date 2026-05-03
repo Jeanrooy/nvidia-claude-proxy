@@ -48,14 +48,20 @@ python-proxy/
 
 ## Setup
 
-### 1. Install dependencies
+### 1. Clone the repository
 
 ```bash
-cd python-proxy
+git clone https://github.com/Jeanrooy/nvidia-claude-proxy.git
+cd nvidia-claude-proxy
+```
+
+### 2. Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure `.env`
+### 3. Configure `.env`
 
 Copy the example and fill in your values:
 
@@ -67,7 +73,7 @@ Edit `.env`:
 
 ```env
 # Address to listen on
-ADDR=127.0.0.1:3001
+ADDR=127.0.0.1:8089
 
 # NVIDIA NIM endpoint (or any OpenAI-compatible URL)
 UPSTREAM_URL=https://integrate.api.nvidia.com/v1/chat/completions
@@ -88,7 +94,7 @@ LOG_BODY_MAX_CHARS=4096
 LOG_STREAM_TEXT_PREVIEW_CHARS=256
 ```
 
-### 3. Run
+### 4. Run
 
 ```bash
 python main.py
@@ -97,7 +103,7 @@ python main.py
 Or via `uvicorn` directly (with auto-reload for development):
 
 ```bash
-uvicorn main:app --host 127.0.0.1 --port 3001 --reload
+uvicorn main:app --host 127.0.0.1 --port 8089 --reload
 ```
 
 ---
@@ -114,7 +120,7 @@ The proxy exposes the same endpoint as the Anthropic API:
 ### Quick test (streaming)
 
 ```bash
-curl -N http://127.0.0.1:3001/v1/messages \
+curl -N http://127.0.0.1:8089/v1/messages \
   -H "Content-Type: application/json" \
   -d '{
     "model": "z-ai/glm4.7",
@@ -127,7 +133,7 @@ curl -N http://127.0.0.1:3001/v1/messages \
 ### Quick test (non-streaming)
 
 ```bash
-curl http://127.0.0.1:3001/v1/messages \
+curl http://127.0.0.1:8089/v1/messages \
   -H "Content-Type: application/json" \
   -d '{
     "model": "z-ai/glm4.7",
@@ -141,7 +147,7 @@ curl http://127.0.0.1:3001/v1/messages \
 If `SERVER_API_KEY` is set in `.env`, every request must include a matching key:
 
 ```bash
-curl http://127.0.0.1:3001/v1/messages \
+curl http://127.0.0.1:8089/v1/messages \
   -H "Authorization: Bearer your-server-api-key" \
   -H "Content-Type: application/json" \
   -d '{ ... }'
@@ -153,7 +159,7 @@ curl http://127.0.0.1:3001/v1/messages \
 
 | Variable                       | Default                                               | Description                                         |
 |--------------------------------|-------------------------------------------------------|-----------------------------------------------------|
-| `ADDR`                         | `127.0.0.1:3001`                                      | `host:port` the server listens on                   |
+| `ADDR`                         | `127.0.0.1:8089`                                      | `host:port` the server listens on                   |
 | `UPSTREAM_URL`                 | *(required)*                                          | OpenAI-compatible upstream endpoint                 |
 | `PROVIDER_API_KEY`             | *(required)*                                          | API key forwarded to the upstream (as Bearer token) |
 | `SERVER_API_KEY`               | *(empty = disabled)*                                  | Protect this proxy with inbound auth                |
@@ -169,11 +175,11 @@ Set the `ANTHROPIC_BASE_URL` environment variable before running Claude Code:
 
 ```bash
 # Windows (PowerShell)
-$env:ANTHROPIC_BASE_URL = "http://127.0.0.1:3001"
+$env:ANTHROPIC_BASE_URL = "http://127.0.0.1:8089"
 claude
 
 # Linux / macOS
-ANTHROPIC_BASE_URL=http://127.0.0.1:3001 claude
+ANTHROPIC_BASE_URL=http://127.0.0.1:8089 claude
 ```
 
 Then select any NVIDIA-hosted model using `--model` or the `/model` command inside Claude Code.
