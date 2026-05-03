@@ -1,4 +1,4 @@
-# claude-nvidia-proxy
+# Nvidia Claude Code Proxy
 
 A Python port of the `claude-nvidia-proxy` Go server. It accepts requests in the **Anthropic Messages API** format and transparently translates them to the **OpenAI Chat Completions** format before forwarding to the [NVIDIA NIM](https://integrate.api.nvidia.com) (or any OpenAI-compatible) endpoint. Responses and SSE streams are translated back to the Anthropic format before being returned to the client.
 

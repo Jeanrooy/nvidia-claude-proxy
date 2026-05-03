@@ -30,7 +30,7 @@
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-  .main { display: grid; grid-template-columns: 1fr 340px; grid-template-rows: auto 1fr; gap: 16px; padding: 16px; overflow: hidden; height: 100%; }
+  .main { display: grid; grid-template-columns: 1fr 380px; grid-template-rows: auto 1fr; gap: 16px; padding: 16px; overflow: hidden; height: 100%; }
 
   /* Stat cards */
   .stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
@@ -110,6 +110,12 @@
   /* Empty state */
   .empty { padding: 32px; text-align: center; color: var(--muted); font-size: 12px; }
 
+  /* Requests sidebar */
+  .req-panel-body { flex: 1; overflow-y: auto; min-height: 0; }
+  .req-panel-body::-webkit-scrollbar { width: 4px; }
+  .req-panel-body::-webkit-scrollbar-track { background: transparent; }
+  .req-panel-body::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
   @media (max-width: 1100px) {
     .stats { grid-template-columns: repeat(4, 1fr); }
     .main { grid-template-columns: 1fr; }
@@ -140,53 +146,50 @@
       <div class="card"><div class="label">Models</div><div class="value v-orange" id="s-models">0</div><div class="sub">distinct</div></div>
     </div>
 
-    <!-- Request log panel -->
+    <!-- Logs / Models / Errors panel (main focus) -->
+    <div class="panel">
+      <div class="panel-header" style="padding:8px 10px">
+        <div class="tab-bar" style="flex:1;min-height:0">
+          <button class="tab active" onclick="switchTab('logs')">Logs</button>
+          <button class="tab" onclick="switchTab('models')">Models</button>
+          <button class="tab" onclick="switchTab('errors')">Errors</button>
+        </div>
+      </div>
+
+      <!-- Logs tab -->
+      <div id="tab-logs" class="tab-content active panel-body" style="overflow-y:auto;min-height:0;flex:1">
+        <div id="log-feed"></div>
+      </div>
+
+      <!-- Models tab -->
+      <div id="tab-models" class="tab-content" style="overflow-y:auto;min-height:0;flex:1">
+        <div class="model-chart" id="model-chart">
+          <div class="empty">No traffic yet…</div>
+        </div>
+      </div>
+
+      <!-- Errors tab -->
+      <div id="tab-errors" class="tab-content panel-body" style="overflow-y:auto;min-height:0;flex:1">
+        <div id="error-list"><div class="empty">No errors 🎉</div></div>
+      </div>
+    </div>
+
+    <!-- Live Requests sidebar (right, scrollable) -->
     <div class="panel">
       <div class="panel-header">
         <div class="dot" style="background:var(--accent)"></div>
         Live Requests
         <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="req-count">0 shown</span>
       </div>
-      <div class="panel-body">
+      <div class="req-panel-body">
         <table class="req-table">
           <thead><tr>
             <th></th><th>Time</th><th>Model</th><th>Type</th>
-            <th>Msg</th><th>Chars</th><th>Duration</th><th>Status</th>
+            <th>Dur</th><th>Status</th>
           </tr></thead>
           <tbody id="req-tbody"></tbody>
         </table>
         <div id="req-empty" class="empty">Waiting for requests…</div>
-      </div>
-    </div>
-
-    <!-- Right sidebar -->
-    <div class="sidebar">
-      <!-- Tab bar -->
-      <div class="panel" style="flex:1">
-        <div class="panel-header" style="padding:8px 10px">
-          <div class="tab-bar" style="flex:1;min-height:0">
-            <button class="tab active" onclick="switchTab('logs')">Logs</button>
-            <button class="tab" onclick="switchTab('models')">Models</button>
-            <button class="tab" onclick="switchTab('errors')">Errors</button>
-          </div>
-        </div>
-
-        <!-- Logs tab -->
-        <div id="tab-logs" class="tab-content active panel-body" style="overflow-y:auto;min-height:0;flex:1">
-          <div id="log-feed"></div>
-        </div>
-
-        <!-- Models tab -->
-        <div id="tab-models" class="tab-content" style="overflow-y:auto;min-height:0;flex:1">
-          <div class="model-chart" id="model-chart">
-            <div class="empty">No traffic yet…</div>
-          </div>
-        </div>
-
-        <!-- Errors tab -->
-        <div id="tab-errors" class="tab-content panel-body" style="overflow-y:auto;min-height:0;flex:1">
-          <div id="error-list"><div class="empty">No errors 🎉</div></div>
-        </div>
       </div>
     </div>
   </div>
@@ -276,11 +279,9 @@ function renderRequests() {
       <td><span class="st ${stClass}"></span></td>
       <td style="color:var(--muted);font-family:var(--mono);font-size:11px">${fmtTs(r.ts)}</td>
       <td><span class="model-tag" title="${escHtml(r.model)}">${modelShort}</span></td>
-      <td style="color:var(--muted)">${r.stream?'stream':'sync'}</td>
-      <td style="color:var(--dim)">${r.num_messages}</td>
-      <td style="color:var(--dim)">${r.text_chars ? fmt(r.text_chars) : '—'}</td>
+      <td style="color:var(--muted);font-size:11px">${r.stream?'sse':'sync'}</td>
       <td class="dur">${fmtDur(r.duration_ms)}</td>
-      <td>${r.error_code ? `<span style="color:var(--err);font-size:11px">${escHtml(r.error_code)}</span>` : ''}</td>
+      <td>${r.error_code ? `<span style="color:var(--err);font-size:11px">${escHtml(r.error_code)}</span>` : `<span style="color:var(--ok);font-size:11px">ok</span>`}</td>
     </tr>`;
   }).join('');
   tbody.innerHTML = html;
