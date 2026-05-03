@@ -97,13 +97,10 @@ Desktop.ini
 # =============================================================================
 renders/
 .waveform-cache/
-narration.wav
-narration-full.wav
-design.md
-design-full.md
-index.html
-index-full-backup.html
-hyperframes.json
-hyperframes-full.json
+*.wav
+*.mp4
+design*.md
+index*.html
+hyperframes*.json
 .claude/skills/
 compositions/
