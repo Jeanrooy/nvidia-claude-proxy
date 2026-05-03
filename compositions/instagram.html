@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NVIDIA Claude Code Proxy</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a0a;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+    }
+
+    #instagram-video {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      background: #0a0a0a;
+      overflow: hidden;
+    }
+
+    /* Background Elements */
+    .bg-grid {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(118, 185, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(118, 185, 0, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.5;
+    }
+
+    .bg-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+    }
+
+    .bg-glow-1 {
+      background: #76b900;
+      top: -200px;
+      left: -200px;
+    }
+
+    .bg-glow-2 {
+      background: #d97757;
+      bottom: -200px;
+      right: -200px;
+    }
+
+    /* Scene Container */
+    .scene {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 80px 60px;
+      box-sizing: border-box;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .scene.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scene-content {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Typography */
+    .headline {
+      font-size: 72px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .headline span {
+      color: #76b900;
+    }
+
+    .subheadline {
+      font-size: 36px;
+      font-weight: 400;
+      color: #e0e0e0;
+      line-height: 1.3;
+    }
+
+    .body-text {
+      font-size: 28px;
+      font-weight: 400;
+      color: #a0a0a0;
+      line-height: 1.5;
+    }
+
+    .label {
+      font-size: 18px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #76b900;
+    }
+
+    /* Cards */
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+
+    .card-value {
+      font-size: 48px;
+      font-weight: 700;
+      color: #76b900;
+    }
+
+    /* Code Block */
+    .code-block {
+      background: #0d0d0d;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    .code-line {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .code-keyword { color: #ff79c6; }
+    .code-string { color: #f1fa8c; }
+    .code-comment { color: #6272a4; }
+    .code-number { color: #bd93f9; }
+    .code-property { color: #8be9fd; }
+
+    /* Architecture Diagram */
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 40px;
+    }
+
+    .arch-node {
+      background: #1a1a1a;
+      border: 2px solid #333;
+      border-radius: 16px;
+      padding: 24px 40px;
+      text-align: center;
+      min-width: 280px;
+      position: relative;
+    }
+
+    .arch-node.claude {
+      border-color: #d97757;
+    }
+
+    .arch-node.proxy {
+      border-color: #76b900;
+    }
+
+    .arch-node.nvidia {
+      border-color: #76b900;
+    }
+
+    .arch-node-label {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .arch-node-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .arch-arrow {
+      width: 4px;
+      height: 40px;
+      background: linear-gradient(to bottom, #76b900, #d97757);
+      position: relative;
+    }
+
+    .arch-arrow::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: -6px;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 12px solid #76b900;
+    }
+
+    /* Feature List */
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      background: rgba(118, 185, 0, 0.05);
+      border-radius: 12px;
+      border-left: 4px solid #76b900;
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: #76b900;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .feature-text {
+      font-size: 24px;
+      color: #e0e0e0;
+    }
+
+    /* CTA Button */
+    .cta-button {
+      background: linear-gradient(135deg, #76b900, #5a8f00);
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 600;
+      padding: 24px 48px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(118, 185, 0, 0.3);
+    }
+
+    /* Logo */
+    .logo {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #76b900, #d97757);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    /* Scene-specific positioning */
+    #scene-1 .scene-content {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    #scene-2 .scene-content {
+      justify-content: center;
+    }
+
+    #scene-3 .scene-content {
+      justify-content: center;
+    }
+
+    #scene-4 .scene-content {
+      justify-content: center;
+    }
+
+    #scene-5 .scene-content {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="instagram-video" data-composition-id="instagram-video" data-width="1080" data-height="1920" data-start="0" data-duration="40">
+    <!-- Background Elements -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Scene 1: Title (0-5s) -->
+    <div id="scene-1" class="scene active">
+      <div class="scene-content">
+        <div class="logo">
+          <div class="logo-icon">⚡</div>
+          <span>NVIDIA × Claude</span>
+        </div>
+        <h1 class="headline">
+          Use Claude Code<br>
+          <span>For Free</span>
+        </h1>
+        <p class="subheadline">
+          Skip the $100–$200/month subscription
+        </p>
+        <div class="card" style="margin-top: 40px;">
+          <div class="card-value">70B–405B+</div>
+          <div class="card-title">Open-weight models</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 2: Architecture (5-10s) -->
+    <div id="scene-2" class="scene">
+      <div class="scene-content">
+        <div class="label">How it works</div>
+        <h2 class="headline" style="font-size: 56px;">Proxy Architecture</h2>
+        <div class="arch-diagram">
+          <div class="arch-node claude">
+            <div class="arch-node-icon">🤖</div>
+            <div class="arch-node-label">Claude Code</div>
+          </div>
+          <div class="arch-arrow"></div>
+          <div class="arch-node proxy">
+            <div class="arch-node-icon">🔄</div>
+            <div class="arch-node-label">This Proxy</div>
+          </div>
+          <div class="arch-arrow"></div>
+          <div class="arch-node nvidia">
+            <div class="arch-node-icon">🚀</div>
+            <div class="arch-node-label">NVIDIA NIM</div>
+          </div>
+        </div>
+        <p class="body-text" style="text-align: center;">
+          Translates Anthropic API → OpenAI format
+        </p>
+      </div>
+    </div>
+
+    <!-- Scene 3: Features (10-15s) -->
+    <div id="scene-3" class="scene">
+      <div class="scene-content">
+        <div class="label">Features</div>
+        <h2 class="headline" style="font-size: 56px;">Why use this?</h2>
+        <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 32px;">
+          <div class="feature-item">
+            <div class="feature-icon">💰</div>
+            <div class="feature-text">Free NVIDIA NIM preview models</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-text">70B–405B+ open-weight models</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📊</div>
+            <div class="feature-text">Real-time dashboard with logs</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔧</div>
+            <div class="feature-text">Full API translation support</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 4: Code Preview (15-20s) -->
+    <div id="scene-4" class="scene">
+      <div class="scene-content">
+        <div class="label">Setup</div>
+        <h2 class="headline" style="font-size: 56px;">Quick Start</h2>
+        <div class="code-block" style="margin-top: 32px;">
+          <span class="code-line"><span class="code-comment"># Install dependencies</span></span>
+          <span class="code-line"><span class="code-keyword">pip</span> install -r requirements.txt</span>
+          <span class="code-line"></span>
+          <span class="code-line"><span class="code-comment"># Configure .env</span></span>
+          <span class="code-line"><span class="code-property">UPSTREAM_URL</span>=<span class="code-string">https://integrate.api.nvidia.com/v1/chat/completions</span></span>
+          <span class="code-line"><span class="code-property">PROVIDER_API_KEY</span>=<span class="code-string">nvapi-your-key</span></span>
+          <span class="code-line"></span>
+          <span class="code-line"><span class="code-comment"># Run the proxy</span></span>
+          <span class="code-line"><span class="code-keyword">python</span> main.py</span>
+        </div>
+        <p class="body-text" style="margin-top: 24px;">
+          Point Claude Code at localhost:8089
+        </p>
+      </div>
+    </div>
+
+    <!-- Scene 5: CTA (20-25s) -->
+    <div id="scene-5" class="scene">
+      <div class="scene-content">
+        <div class="logo" style="margin-bottom: 40px;">
+          <div class="logo-icon">⚡</div>
+          <span>NVIDIA × Claude</span>
+        </div>
+        <h1 class="headline">
+          Start Coding<br>
+          <span>Today</span>
+        </h1>
+        <p class="subheadline" style="margin-top: 24px;">
+          No subscription required
+        </p>
+        <div class="cta-button" style="margin-top: 48px;">
+          Get Started Free
+        </div>
+        <p class="body-text" style="margin-top: 32px; font-size: 20px;">
+          github.com/Jeanrooy/nvidia-claude-proxy
+        </p>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene 1: Title entrance
+      tl.from("#scene-1 .logo", { y: -60, opacity: 0, duration: 0.8, ease: "expo.out" }, 0.3);
+      tl.from("#scene-1 .headline", { y: 80, opacity: 0, duration: 1.0, ease: "expo.out" }, 0.5);
+      tl.from("#scene-1 .subheadline", { y: 40, opacity: 0, duration: 0.8, ease: "power3.out" }, 0.8);
+      tl.from("#scene-1 .card", { scale: 0.8, opacity: 0, duration: 0.6, ease: "back.out(1.7)" }, 1.0);
+
+      // Scene 1 exit, Scene 2 entrance
+      tl.to("#scene-1", { opacity: 0, duration: 0.5, ease: "power2.in" }, 7.0);
+      tl.set("#scene-1", { visibility: "hidden" }, 7.5);
+      tl.set("#scene-2", { visibility: "visible" }, 7.5);
+      tl.to("#scene-2", { opacity: 1, duration: 0.5, ease: "power2.out" }, 7.5);
+
+      // Scene 2: Architecture entrance
+      tl.from("#scene-2 .label", { x: -40, opacity: 0, duration: 0.6, ease: "power3.out" }, 7.7);
+      tl.from("#scene-2 .headline", { y: 60, opacity: 0, duration: 0.8, ease: "expo.out" }, 7.9);
+      tl.from("#scene-2 .arch-node", { y: 40, opacity: 0, stagger: 0.15, duration: 0.6, ease: "power3.out" }, 8.3);
+      tl.from("#scene-2 .arch-arrow", { scaleY: 0, opacity: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" }, 8.5);
+      tl.from("#scene-2 .body-text", { y: 30, opacity: 0, duration: 0.5, ease: "power2.out" }, 8.9);
+
+      // Scene 2 exit, Scene 3 entrance
+      tl.to("#scene-2", { opacity: 0, duration: 0.5, ease: "power2.in" }, 13.5);
+      tl.set("#scene-2", { visibility: "hidden" }, 14.0);
+      tl.set("#scene-3", { visibility: "visible" }, 14.0);
+      tl.to("#scene-3", { opacity: 1, duration: 0.5, ease: "power2.out" }, 14.0);
+
+      // Scene 3: Features entrance
+      tl.from("#scene-3 .label", { x: -40, opacity: 0, duration: 0.6, ease: "power3.out" }, 14.2);
+      tl.from("#scene-3 .headline", { y: 60, opacity: 0, duration: 0.8, ease: "expo.out" }, 14.4);
+      tl.from("#scene-3 .feature-item", { x: -60, opacity: 0, stagger: 0.12, duration: 0.5, ease: "power3.out" }, 14.8);
+
+      // Scene 3 exit, Scene 4 entrance
+      tl.to("#scene-3", { opacity: 0, duration: 0.5, ease: "power2.in" }, 21.0);
+      tl.set("#scene-3", { visibility: "hidden" }, 21.5);
+      tl.set("#scene-4", { visibility: "visible" }, 21.5);
+      tl.to("#scene-4", { opacity: 1, duration: 0.5, ease: "power2.out" }, 21.5);
+
+      // Scene 4: Code entrance
+      tl.from("#scene-4 .label", { x: -40, opacity: 0, duration: 0.6, ease: "power3.out" }, 21.7);
+      tl.from("#scene-4 .headline", { y: 60, opacity: 0, duration: 0.8, ease: "expo.out" }, 21.9);
+      tl.from("#scene-4 .code-block", { y: 40, opacity: 0, duration: 0.7, ease: "power3.out" }, 22.3);
+      tl.from("#scene-4 .code-line", { x: -30, opacity: 0, stagger: 0.08, duration: 0.4, ease: "power2.out" }, 22.7);
+      tl.from("#scene-4 .body-text", { y: 30, opacity: 0, duration: 0.5, ease: "power2.out" }, 23.5);
+
+      // Scene 4 exit, Scene 5 entrance
+      tl.to("#scene-4", { opacity: 0, duration: 0.5, ease: "power2.in" }, 30.0);
+      tl.set("#scene-4", { visibility: "hidden" }, 30.5);
+      tl.set("#scene-5", { visibility: "visible" }, 30.5);
+      tl.to("#scene-5", { opacity: 1, duration: 0.5, ease: "power2.out" }, 30.5);
+
+      // Scene 5: CTA entrance
+      tl.from("#scene-5 .logo", { y: -60, opacity: 0, duration: 0.8, ease: "expo.out" }, 30.7);
+      tl.from("#scene-5 .headline", { y: 80, opacity: 0, duration: 1.0, ease: "expo.out" }, 30.9);
+      tl.from("#scene-5 .subheadline", { y: 40, opacity: 0, duration: 0.8, ease: "power3.out" }, 31.3);
+      tl.from("#scene-5 .cta-button", { scale: 0.8, opacity: 0, duration: 0.6, ease: "back.out(1.7)" }, 31.7);
+      tl.from("#scene-5 .body-text", { y: 30, opacity: 0, duration: 0.5, ease: "power2.out" }, 32.1);
+
+      // Ambient animations
+      tl.to(".bg-glow-1", { scale: 1.2, opacity: 0.2, duration: 3, ease: "sine.inOut", repeat: 13, yoyo: true }, 0);
+      tl.to(".bg-glow-2", { scale: 1.2, opacity: 0.2, duration: 3, ease: "sine.inOut", repeat: 13, yoyo: true }, 0.5);
+
+      window.__timelines["instagram-video"] = tl;
+    </script>
+  </div>
+</body>
+</html>

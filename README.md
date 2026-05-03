@@ -288,17 +288,6 @@ ANTHROPIC_BASE_URL=http://127.0.0.1:8089 ANTHROPIC_API_KEY=nvapi-your-key claude
 
 ---
 
-## Differences from the Go Version
-
-| Feature            | Go version          | Python version       |
-|--------------------|---------------------|----------------------|
-| Config format      | `config.json`       | `.env`               |
-| Runtime            | Native binary       | Python 3.11+ + uvicorn |
-| Framework          | `net/http`          | FastAPI + httpx      |
-| Streaming          | `bufio` line scan   | `httpx` async stream |
-| Hot reload         | Requires rebuild    | `--reload` flag      |
-
----
 
 ## Security Notes
 
